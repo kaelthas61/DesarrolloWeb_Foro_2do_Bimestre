@@ -1,0 +1,104 @@
+-- CREACIÓN DE LA BASE DE DATOS
+create database biblioteca_chango;
+use biblioteca_chango;
+
+create table libros (
+	idLibro int not null,
+    isbn varchar (15) not null unique,
+    titulo varchar (500) not null,
+    sinopsis varchar (2500),
+	numPaginas int not null,
+    idioma char (2) not null,
+    anio smallint not null,
+    nroEdicion smallint,
+    idEdt int not null,
+    idAutorPrincipal int not null,
+    primary key (idLibro)
+);
+
+create table autores (
+	idAutor int not null,
+    nombreAutor varchar (100) not null,
+    pais char (2) not null,
+    bio varchar (2500),
+    numLibros int,
+    primary key (idAutor)
+);
+
+create table editoriales (
+	idEdt int not null,
+    nombreEdt varchar (100) not null,
+    pais varchar (100) not null,
+    web varchar (200),
+    primary key (idEdt)
+);
+
+create table usuarios (
+	cedula varchar (15) not null,
+    apellidos varchar (50) not null,
+    nombres varchar (50) not null,
+    direccion varchar (250),
+    email varchar (60) unique,
+    telefono varchar (20) not null,
+    primary key (cedula)
+);
+
+create table prestamos (
+	idPrestamo int not null,
+    idEjemplar int not null,
+    cedula varchar (15) not null,
+    fechaPrestamo date not null,
+    fechaVencimiento date not null,
+    fechaDevolucion date,
+    observacion varchar (2000),
+    primary key (idPrestamo)
+);
+
+create table ejemplares_libro (
+	idEjemplar int not null,
+    idLibro int not null,
+    ubicacion varchar (40),
+    status char (1) default "D",
+    primary key (idEjemplar)
+);
+
+-- RESTRICCIONES DE LAS TABLAS
+alter table libros add constraint libros_edit_fk foreign key (idEdt) references editoriales (idEdt);
+alter table libros add constraint libros_autores_fk foreign key (idAutorPrincipal) references autores (idAutor);
+alter table prestamos add constraint prestamos_ejem_fk foreign key (idEjemplar) references ejemplares_libro (idEjemplar);
+alter table prestamos add constraint prestamos_usuarios_fk foreign key (cedula) references usuarios (cedula);
+alter table ejemplares_libro add constraint ejemplar_libro_fk foreign key (idLibro) references libros (idLibro);
+
+-- RESTRICCIONES ADICIONALES 
+alter table libros add constraint nroEdicion_chk check (nroEdicion >0);
+alter table libros add constraint numPaginas_chk check (numPaginas > 50 and numPaginas <2000);
+alter table libros add constraint anio_chk check (anio > 1800);
+alter table ejemplares_libro add constraint status_chk check (status in ('D','P','B'));
+alter table autores add constraint numLibros_chk check (numLibros >0);
+
+-- CARGA DE DATOS
+insert into autores (idAutor, nombreAutor, pais,bio,numLibros) value (1,'Pablo Neruda','CO','Pablo Neruda reconocifo escritor de poesia',23);
+insert into autores (idAutor, nombreAutor, pais,bio,numLibros) value (2,'Medardo Silva','EC','UN icono en la poesia perteneciente a la generacion decapitada.',10);
+insert into autores (idAutor, nombreAutor, pais,bio,numLibros) value (3,'Moises','IA','Afanado escrito en hebreo',9);
+
+
+insert into editoriales (idEdt,nombreEdt,pais,web) value (1,'Edt1','Ecuador','www.ejemlplo1.tv');
+insert into editoriales (idEdt,nombreEdt,pais,web) value (2,'Edt2','Colombia','www.ejemplo2.com');
+insert into editoriales (idEdt,nombreEdt,pais,web) value (3,'Edt3','Suecia','www.ejemplo3.co');
+
+insert into libros (idLibro, isbn, titulo, sinopsis, numPaginas, idioma, anio, nroEdicion, idEdt, idAutorPrincipal)
+value (1,'2215648516','Remenbranzas','colecion de los mejores poemas de Neruda',200,'ES',1972,5,1,1);
+insert into libros (idLibro, isbn, titulo, sinopsis, numPaginas, idioma, anio, nroEdicion, idEdt, idAutorPrincipal)
+value (2,'2315465578','Querida','poemas efimeros',150,'ES',1980,6,2,2);
+insert into libros (idLibro, isbn, titulo, sinopsis, numPaginas, idioma, anio, nroEdicion, idEdt, idAutorPrincipal)
+value (3,'2344459898','Libro de job','escrituras biblicas',500,'HE',2001,1,3,3);
+
+insert into usuarios (cedula, apellidos, nombres, direccion, email, telefono) value ('0504270083','Chango Torres','Cristian Mauricio','Latacunga','cmchango2@utpl.edu.ec','0998444186');
+insert into usuarios (cedula, apellidos, nombres, direccion, email, telefono) value ('0504270091','Chango Torres','Alex Ivan','Quito','changoalex1@gmail.com','0995624117');
+
+insert into ejemplares_libro (idEjemplar, idLibro, ubicacion, status) value (1,1,'L2','D');
+insert into ejemplares_libro (idEjemplar, idLibro, ubicacion, status) value (2,2,'L4','D');
+insert into ejemplares_libro (idEjemplar, idLibro, ubicacion, status) value (3,3,'R2','P');
+
+insert into prestamos (idPrestamo, idEjemplar, cedula, fechaPrestamo, fechaVencimiento, observacion)
+value (1,3,'0504270083','2023-02-12','2023-02-15','libro en excelentes condiciones');
